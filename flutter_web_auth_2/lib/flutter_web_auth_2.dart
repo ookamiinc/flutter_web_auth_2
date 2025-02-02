@@ -12,14 +12,15 @@ export 'src/unsupported.dart'
     if (dart.library.html) 'src/web.dart';
 
 class _OnAppLifecycleResumeObserver extends WidgetsBindingObserver {
-  final Function onResumed;
+  final Function(List<String>) onResumed;
+  final List<String> validSchemes;
 
-  _OnAppLifecycleResumeObserver(this.onResumed);
+  _OnAppLifecycleResumeObserver(this.onResumed, this.validSchemes);
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      onResumed();
+      onResumed(validSchemes);
     }
   }
 }
@@ -59,23 +60,31 @@ class FlutterWebAuth2 {
   /// platform-specific settings.
   static Future<String> authenticate({
     required String url,
-    required String callbackUrlScheme,
+    required List<String> callbackUrlSchemes,
     FlutterWebAuth2Options options = const FlutterWebAuth2Options(),
   }) async {
+    assert(
+      callbackUrlSchemes.isNotEmpty,
+      'At least one callback URL scheme must be provided.',
+    );
+
     assert(
       !(kIsWeb && options.debugOrigin != null && !kDebugMode),
       'Do not use debugOrigin in production',
     );
 
-    _assertCallbackScheme(callbackUrlScheme);
+    for (final scheme in callbackUrlSchemes) {
+      _assertCallbackScheme(scheme);
+    }
 
     WidgetsBinding.instance.removeObserver(
       _resumedObserver,
     ); // safety measure so we never add this observer twice
+    _resumedObserver = _OnAppLifecycleResumeObserver(_cleanUpDanglingCalls, callbackUrlSchemes);
     WidgetsBinding.instance.addObserver(_resumedObserver);
     return _platform.authenticate(
       url: url,
-      callbackUrlScheme: callbackUrlScheme,
+      callbackUrlSchemes: callbackUrlSchemes,
       options: options.toJson(),
     );
   }

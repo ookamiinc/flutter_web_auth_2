@@ -26,12 +26,12 @@ abstract class FlutterWebAuth2Platform extends PlatformInterface {
 
   Future<String> authenticate({
     required String url,
-    required String callbackUrlScheme,
+    required List<String> callbackUrlSchemes,
     required Map<String, dynamic> options,
   }) =>
       _instance.authenticate(
         url: url,
-        callbackUrlScheme: callbackUrlScheme,
+        callbackUrlSchemes: callbackUrlSchemes,
         options: options,
       );
 

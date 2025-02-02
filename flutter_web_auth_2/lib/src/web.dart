@@ -26,7 +26,7 @@ class FlutterWebAuth2WebPlugin extends FlutterWebAuth2Platform {
         final url = call.arguments['url'].toString();
         return authenticate(
           url: url,
-          callbackUrlScheme: '',
+          callbackUrlSchemes: [''],
           options: call.arguments['options'],
         );
       default:
@@ -41,7 +41,7 @@ class FlutterWebAuth2WebPlugin extends FlutterWebAuth2Platform {
   @override
   Future<String> authenticate({
     required String url,
-    required String callbackUrlScheme,
+    required List<String> callbackUrlSchemes,
     required Map<String, dynamic> options,
   }) async {
     final parsedOptions = FlutterWebAuth2Options.fromJson(options);

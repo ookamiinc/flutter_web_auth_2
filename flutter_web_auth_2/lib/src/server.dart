@@ -21,17 +21,28 @@ class FlutterWebAuth2ServerPlugin extends FlutterWebAuth2Platform {
   @override
   Future<String> authenticate({
     required String url,
-    required String callbackUrlScheme,
+    required List<String> callbackUrlSchemes,
     required Map<String, dynamic> options,
   }) async {
     final parsedOptions = FlutterWebAuth2Options.fromJson(options);
 
     // Validate callback url
-    final callbackUri = Uri.parse(callbackUrlScheme);
+    Uri? selectedCallbackUri;
 
-    if (callbackUri.scheme != 'http' ||
-        (callbackUri.host != 'localhost' && callbackUri.host != '127.0.0.1') ||
-        !callbackUri.hasPort) {
+    for (final scheme in callbackUrlSchemes) {
+      final callbackUri = Uri.parse(scheme);
+
+      if (callbackUri.scheme != 'http' ||
+          (callbackUri.host != 'localhost' && callbackUri.host != '127.0.0.1') ||
+          !callbackUri.hasPort) {
+        continue;
+      }
+
+      selectedCallbackUri = callbackUri;
+      break;
+    }
+
+    if (selectedCallbackUri == null) {
       throw ArgumentError(
         'Callback url scheme must start with http://localhost:{port}',
       );
@@ -39,7 +50,7 @@ class FlutterWebAuth2ServerPlugin extends FlutterWebAuth2Platform {
 
     await _server?.close(force: true);
 
-    _server = await HttpServer.bind('127.0.0.1', callbackUri.port);
+    _server = await HttpServer.bind('127.0.0.1', selectedCallbackUri.port);
     String? result;
 
     _authTimeout?.cancel();

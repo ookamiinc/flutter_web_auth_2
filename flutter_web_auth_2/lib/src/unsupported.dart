@@ -12,7 +12,7 @@ class FlutterWebAuth2UnsupportedPlugin extends FlutterWebAuth2Platform {
   @override
   Future<String> authenticate({
     required String url,
-    required String callbackUrlScheme,
+    required List<String> callbackUrlSchemes,
     required Map<String, dynamic> options,
   }) async {
     throw PlatformException(

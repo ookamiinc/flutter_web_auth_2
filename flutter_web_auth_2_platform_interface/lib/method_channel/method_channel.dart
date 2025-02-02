@@ -8,12 +8,12 @@ class FlutterWebAuth2MethodChannel extends FlutterWebAuth2Platform {
   @override
   Future<String> authenticate({
     required String url,
-    required String callbackUrlScheme,
+    required List<String> callbackUrlSchemes,
     required Map<String, dynamic> options,
   }) async =>
       await channel.invokeMethod<String>('authenticate', <String, dynamic>{
         'url': url,
-        'callbackUrlScheme': callbackUrlScheme,
+        'callbackUrlSchemes': callbackUrlSchemes,
         'options': options,
       }) ??
       '';

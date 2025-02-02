@@ -45,10 +45,24 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
     when (call.method) {
         "authenticate" -> {
           val url = Uri.parse(call.argument("url"))
-          val callbackUrlScheme = call.argument<String>("callbackUrlScheme")!!
+          val callbackUrlSchemes = call.argument<List<String>>("callbackUrlSchemes") ?: emptyList()
           val options = call.argument<Map<String, Any>>("options")!!
 
-          callbacks[callbackUrlScheme] = resultCallback
+          if (callbackUrlSchemes.isEmpty()) {
+              resultCallback.error("INVALID_SCHEME", "No callbackUrlSchemes provided", null)
+              return
+          }
+
+          callbackUrlSchemes.forEach { scheme ->
+              if (callbacks.containsKey(scheme)) {
+                  resultCallback.error("CANCELED", "Another authentication process is ongoing", null)
+                  return
+              }
+          }
+
+          callbackUrlSchemes.forEach { scheme ->
+              callbacks[scheme] = mutableListOf(resultCallback)
+          }
 
           val intent = CustomTabsIntent.Builder().build()
           val keepAliveIntent = Intent(context, KeepAliveService::class.java)
@@ -59,10 +73,20 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
           intent.launchUrl(context!!, url)
         }
         "cleanUpDanglingCalls" -> {
-          callbacks.forEach{ (_, danglingResultCallback) ->
-              danglingResultCallback.error("CANCELED", "User canceled login", null)
+          val validSchemes = call.argument<List<String>>("callbackUrlSchemes") ?: emptyList()
+          val canceledCallbacks = mutableListOf<Result>()
+
+          callbacks.forEach { (scheme, danglingResultCallbacks) ->
+              if (scheme !in validSchemes) {
+                  canceledCallbacks.addAll(danglingResultCallbacks)
+              }
           }
+
           callbacks.clear()
+
+          canceledCallbacks.forEach {
+              it.error("CANCELED", "User canceled login", null)
+          }
           resultCallback.success(null)
         }
         else -> resultCallback.notImplemented()
