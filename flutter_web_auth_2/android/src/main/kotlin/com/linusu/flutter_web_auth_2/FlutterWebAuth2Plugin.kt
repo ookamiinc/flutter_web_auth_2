@@ -46,7 +46,7 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
     when (call.method) {
         "authenticate" -> {
           val url = Uri.parse(call.argument("url"))
-          val callbackUrlSchemes = call.argument<List<String>>("callbackUrlSchemes") ?: emptyList()
+          val callbackUrlSchemes = call.argument<List<String>>("callbackUrlSchemes").toMutableList() ?: mutableListOf()
           val options = call.argument<Map<String, Any>>("options")!!
 
           if (callbackUrlSchemes.isEmpty()) {
