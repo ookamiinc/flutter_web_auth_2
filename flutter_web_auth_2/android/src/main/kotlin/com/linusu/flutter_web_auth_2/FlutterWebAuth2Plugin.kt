@@ -76,7 +76,7 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
         }
         "cleanUpDanglingCalls" -> {
           if (callbacks.size == validSchemes.size) {
-            resultCallback.error("CANCELED", "User canceled login", null)
+            callbacks.values.firstOrNull()?.error("CANCELED", "User canceled login", null)
           }
 
           callbacks.clear()
