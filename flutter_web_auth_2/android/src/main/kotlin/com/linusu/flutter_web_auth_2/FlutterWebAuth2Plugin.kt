@@ -75,18 +75,12 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
           intent.launchUrl(context!!, url)
         }
         "cleanUpDanglingCalls" -> {
-          val canceledCallbacks = mutableListOf<Result>()
-
-          callbacks.forEach { (scheme, danglingResultCallback) ->
-              if (scheme !in validSchemes) {
-                  canceledCallbacks.add(danglingResultCallback)
-              }
+          if (callbacks.size == validSchemes.size) {
+            resultCallback.error("CANCELED", "User canceled login", null)
           }
 
           callbacks.clear()
           validSchemes.clear()
-
-          canceledCallbacks.firstOrNull()?.error("CANCELED", "User canceled login", null)
 
           resultCallback.success(null)
         }
