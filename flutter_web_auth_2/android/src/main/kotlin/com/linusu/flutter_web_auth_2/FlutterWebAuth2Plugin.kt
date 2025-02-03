@@ -17,6 +17,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 class FlutterWebAuth2Plugin(private var context: Context? = null, private var channel: MethodChannel? = null): MethodCallHandler, FlutterPlugin {
   companion object {
     val callbacks = mutableMapOf<String, Result>()
+    var validSchemes: MutableList<String> = mutableListOf()
 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
@@ -63,6 +64,7 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
           callbackUrlSchemes.forEach { scheme ->
               callbacks[scheme] = resultCallback
           }
+          validSchemes = callbackUrlSchemes
 
           val intent = CustomTabsIntent.Builder().build()
           val keepAliveIntent = Intent(context, KeepAliveService::class.java)
@@ -73,7 +75,6 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
           intent.launchUrl(context!!, url)
         }
         "cleanUpDanglingCalls" -> {
-          val validSchemes = call.argument<List<String>>("callbackUrlSchemes") ?: emptyList()
           val canceledCallbacks = mutableListOf<Result>()
 
           callbacks.forEach { (scheme, danglingResultCallback) ->
@@ -83,6 +84,7 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
           }
 
           callbacks.clear()
+          validSchemes.clear()
 
           canceledCallbacks.firstOrNull()?.error("CANCELED", "User canceled login", null)
 
