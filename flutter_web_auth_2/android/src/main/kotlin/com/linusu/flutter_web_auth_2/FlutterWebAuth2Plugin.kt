@@ -61,7 +61,7 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
           }
 
           callbackUrlSchemes.forEach { scheme ->
-              callbacks[scheme] = mutableListOf(resultCallback)
+              callbacks[scheme] = resultCallback
           }
 
           val intent = CustomTabsIntent.Builder().build()
