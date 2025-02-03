@@ -15,7 +15,8 @@ public class FlutterWebAuth2Plugin: NSObject, FlutterPlugin, ASWebAuthentication
            let arguments = call.arguments as? [String: AnyObject],
            let urlString = arguments["url"] as? String,
            let url = URL(string: urlString),
-           let callbackURLScheme = arguments["callbackUrlScheme"] as? String,
+           let callbackUrlSchemes = arguments["callbackUrlSchemes"] as? [String],
+           let callbackURLScheme = callbackUrlSchemes.first,
            let options = arguments["options"] as? [String: AnyObject]
         {
             var sessionToKeepAlive: Any? // if we do not keep the session alive, it will get closed immediately while showing the dialog
