@@ -46,7 +46,7 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
     when (call.method) {
         "authenticate" -> {
           val url = Uri.parse(call.argument("url"))
-          val callbackUrlSchemes = call.argument<List<String>>("callbackUrlSchemes").toMutableList() ?: mutableListOf()
+          val callbackUrlSchemes = call.argument<List<String>>("callbackUrlSchemes") ?: emptyList()
           val options = call.argument<Map<String, Any>>("options")!!
 
           if (callbackUrlSchemes.isEmpty()) {
@@ -64,7 +64,7 @@ class FlutterWebAuth2Plugin(private var context: Context? = null, private var ch
           callbackUrlSchemes.forEach { scheme ->
               callbacks[scheme] = resultCallback
           }
-          validSchemes = callbackUrlSchemes
+          validSchemes.addAll(callbackUrlSchemes)
 
           val intent = CustomTabsIntent.Builder().build()
           val keepAliveIntent = Intent(context, KeepAliveService::class.java)
