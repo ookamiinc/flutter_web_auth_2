@@ -12,15 +12,14 @@ export 'src/unsupported.dart'
     if (dart.library.html) 'src/web.dart';
 
 class _OnAppLifecycleResumeObserver extends WidgetsBindingObserver {
-  final Function(List<String>) onResumed;
-  final List<String> validSchemes;
+  final Function onResumed;
 
-  _OnAppLifecycleResumeObserver(this.onResumed, this.validSchemes);
+  _OnAppLifecycleResumeObserver(this.onResumed);
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      onResumed(validSchemes);
+      onResumed();
     }
   }
 }
@@ -32,7 +31,7 @@ class FlutterWebAuth2 {
       FlutterWebAuth2Platform.instance;
 
   static final _OnAppLifecycleResumeObserver _resumedObserver =
-      _OnAppLifecycleResumeObserver(_cleanUpDanglingCalls, []);
+      _OnAppLifecycleResumeObserver(_cleanUpDanglingCalls);
 
   static void _assertCallbackScheme(String callbackUrlScheme) {
     if ((kIsWeb || (!Platform.isWindows && !Platform.isLinux)) &&
@@ -80,7 +79,7 @@ class FlutterWebAuth2 {
     WidgetsBinding.instance.removeObserver(
       _resumedObserver,
     ); // safety measure so we never add this observer twice
-    _resumedObserver = _OnAppLifecycleResumeObserver(_cleanUpDanglingCalls, callbackUrlSchemes);
+    _resumedObserver = _OnAppLifecycleResumeObserver(_cleanUpDanglingCalls);
     WidgetsBinding.instance.addObserver(_resumedObserver);
     return _platform.authenticate(
       url: url,
