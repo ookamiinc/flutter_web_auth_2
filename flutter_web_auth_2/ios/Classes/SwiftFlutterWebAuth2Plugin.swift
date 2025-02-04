@@ -18,7 +18,7 @@ public class SwiftFlutterWebAuth2Plugin: NSObject, FlutterPlugin {
            let arguments = call.arguments as? [String: AnyObject],
            let urlString = arguments["url"] as? String,
            let url = URL(string: urlString),
-           let callbackUrlSchemes = arguments["callbackUrlSchemes"] as? [String]
+           let callbackUrlSchemes = arguments["callbackUrlSchemes"] as? [String],
            let callbackURLScheme = callbackUrlSchemes.first,
            let options = arguments["options"] as? [String: AnyObject]
         {
