@@ -12,6 +12,7 @@ public class SwiftFlutterWebAuth2Plugin: NSObject, FlutterPlugin {
     }
 
     var completionHandler: ((URL?, Error?) -> Void)?
+    var sessionToKeepAlive: Any? // if we do not keep the session alive, it will get closed immediately while showing the dialog
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         if call.method == "authenticate",
@@ -21,9 +22,9 @@ public class SwiftFlutterWebAuth2Plugin: NSObject, FlutterPlugin {
            let callbackURLScheme = arguments["callbackUrlScheme"] as? String,
            let options = arguments["options"] as? [String: AnyObject]
         {
-            var sessionToKeepAlive: Any? // if we do not keep the session alive, it will get closed immediately while showing the dialog
             completionHandler = { (url: URL?, err: Error?) in
                 self.completionHandler = nil
+                self.sessionToKeepAlive = nil
 
                 if (sessionToKeepAlive != nil) {
                     if #available(iOS 12, *) {
@@ -120,12 +121,12 @@ public class SwiftFlutterWebAuth2Plugin: NSObject, FlutterPlugin {
                     }
                 }
 
-                session.start()
                 sessionToKeepAlive = session
+                session.start()
             } else if #available(iOS 11, *) {
                 let session = SFAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme, completionHandler: completionHandler!)
-                session.start()
                 sessionToKeepAlive = session
+                session.start()
             } else {
                 result(FlutterError(code: "FAILED", message: "This plugin does currently not support iOS lower than iOS 11", details: nil))
             }
